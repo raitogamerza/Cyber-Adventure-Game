@@ -182,7 +182,10 @@ public class Map1Level {
         gp.enemies.add(new GunslingerEnemy(gp, t * 44, groundY, t * 41, t * 47));
 
         // [Area 4: Boss Room]
-        gp.enemies.add(new BossEnemy(gp, t * 116, gp.screenHeight - t * 3 - 44));
+        gp.enemies.add(new BossEnemy(gp, t * 116, gp.screenHeight - t * 3 - 56));
+        gp.enemies.add(new DroneEnemy(gp, t * 108, gp.screenHeight - t * 8, t * 103, t * 112, 4));
+        gp.enemies.add(new DroneEnemy(gp, t * 116, gp.screenHeight - t * 9, t * 112, t * 121, 5));
+        gp.enemies.add(new DroneEnemy(gp, t * 123, gp.screenHeight - t * 7, t * 119, t * 127, 4));
     }
 
     public void drawBackground(Graphics2D g2, int cameraX) {

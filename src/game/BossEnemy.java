@@ -8,32 +8,70 @@ import java.io.File;
 import javax.imageio.ImageIO;
 
 /**
- * Boss enemy (Enemy Type 6 - Heavy Cannon Tank).
- * Guarding the final area with high HP, cannonball barrages, and a screen-wide boss health bar.
+ * Boss enemy (Folder: All Boss / 2 - Cyber Enforcer).
+ * Agile, high-tech boss equipped with ranged blaster (Bullet.png), 
+ * multi-phase attack combos (Attack 1-4), and sneer taunts.
  */
 public class BossEnemy extends Enemy {
-    private int shootCooldown = 60;
+    private int shootCooldown = 50;
     private boolean firedThisAttack = false;
-    private static BufferedImage cannonballImg;
-    private static boolean ballLoaded = false;
+    private static BufferedImage bulletImg;
+    private static boolean bulletLoaded = false;
+
+    // Additional attack animations for Boss 2
+    private BufferedImage attack1Sheet;
+    private BufferedImage attack2Sheet;
+    private BufferedImage attack3Sheet;
+    private BufferedImage attack4Sheet;
+    private BufferedImage sneerSheet;
+
+    private int attackType = 1; // 1 = Ranged Shot, 2 = Melee Slash, 3 = Quick Strike, 4 = Heavy Burst
 
     public BossEnemy(GamePanel gp, int x, int y) {
-        super(gp, x, y, 36, 44, 20, 0.8);
-        loadSprites("src/game/All enemies/6", 4, 4, 4);
-        loadCannonball();
+        super(gp, x, y, 44, 56, 35, 1.2);
+        this.idleFrames = 4;
+        this.walkFrames = 6;
+        this.attackFrames = 8;
+        this.deathFrames = 6;
+        this.hurtFrames = 2;
+        this.animSpeed = 6;
+
+        loadSprites("src/game/All enemies/All Boss/2", 6, 8, 6);
+        loadBoss2Assets("src/game/All enemies/All Boss/2");
     }
 
-    private static void loadCannonball() {
-        if (!ballLoaded) {
-            try {
-                File f = new File("src/game/All enemies/6/Ball1.png");
-                if (f.exists()) {
-                    cannonballImg = ImageIO.read(f);
+    private void loadBoss2Assets(String folder) {
+        try {
+            File f1 = new File(folder + "/Attack1.png");
+            if (f1.exists()) attack1Sheet = ImageIO.read(f1);
+
+            File f2 = new File(folder + "/Attack2.png");
+            if (f2.exists()) attack2Sheet = ImageIO.read(f2);
+
+            File f3 = new File(folder + "/Attack3.png");
+            if (f3.exists()) attack3Sheet = ImageIO.read(f3);
+
+            File f4 = new File(folder + "/Attack4.png");
+            if (f4.exists()) attack4Sheet = ImageIO.read(f4);
+
+            File fSneer = new File(folder + "/Sneer.png");
+            if (fSneer.exists()) sneerSheet = ImageIO.read(fSneer);
+
+            if (!bulletLoaded) {
+                File fBullet = new File(folder + "/Bullet.png");
+                if (fBullet.exists()) {
+                    bulletImg = ImageIO.read(fBullet);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+                bulletLoaded = true;
             }
-            ballLoaded = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Set initial attack sheet to Attack1
+        if (attack1Sheet != null) {
+            attackSheet = attack1Sheet;
+            attackFrames = 8;
         }
     }
 
@@ -41,48 +79,95 @@ public class BossEnemy extends Enemy {
     protected void updateAI() {
         if (shootCooldown > 0) shootCooldown--;
 
-        // Face player
-        facingDirection = (gp.player.x >= x) ? 1 : -1;
+        // Always face player
+        if (gp != null && gp.player != null) {
+            facingDirection = (gp.player.x >= x) ? 1 : -1;
+        }
+
+        int distToPlayer = (gp != null && gp.player != null) ? Math.abs(gp.player.x - x) : 999;
 
         if (currentState == STATE_ATTACK) {
-            // Fire cannonball on frame 2 of attack
-            if (spriteNum == 2 && !firedThisAttack) {
+            // Ranged Attack 1 or 4: Fire bullets
+            if ((attackType == 1 || attackType == 4) && (spriteNum == 4 || spriteNum == 5) && !firedThisAttack) {
                 firedThisAttack = true;
-                int ballX = (facingDirection == 1) ? (x + width + 8) : (x - 14);
-                int ballY = y + 16;
+                int bulletX = (facingDirection == 1) ? (x + width + 4) : (x - 16);
+                int bulletY = y + 24;
+
                 if (gp != null && gp.enemyProjectiles != null) {
-                    gp.enemyProjectiles.add(new EnemyProjectile(gp, ballX, ballY, facingDirection));
+                    gp.enemyProjectiles.add(new EnemyProjectile(gp, bulletX, bulletY, facingDirection, bulletImg));
                 }
                 if (gp != null && gp.effects != null) {
-                    gp.effects.add(new MuzzleFlash(ballX, ballY, facingDirection));
+                    gp.effects.add(new MuzzleFlash(bulletX, bulletY, facingDirection));
                 }
             }
 
+            // Melee Attack 2 or 3: Damage player if in close range during peak frame
+            if ((attackType == 2 || attackType == 3) && spriteNum == 3 && !firedThisAttack) {
+                if (distToPlayer < 65 && Math.abs(gp.player.y - y) < 40) {
+                    firedThisAttack = true;
+                    gp.player.takeDamage(15);
+                    if (gp.effects != null) {
+                        gp.effects.add(new ImpactEffect(gp.player.x + gp.player.width / 2, gp.player.y + gp.player.height / 2, facingDirection));
+                    }
+                }
+            }
+
+            // End of attack animation
             if (spriteNum >= attackFrames - 1) {
                 currentState = STATE_IDLE;
-                shootCooldown = 65; // Time between cannon shots
+                shootCooldown = 45; // Cooldown before next action
             }
             return;
         }
 
-        // Fire cannon when ready
+        // Movement & Attack Decision
         if (shootCooldown <= 0) {
+            // Choose attack based on distance
+            if (distToPlayer <= 80) {
+                // Close range: choose Attack 2 (Slash) or Attack 3 (Quick Strike)
+                attackType = (Math.random() < 0.5) ? 2 : 3;
+            } else {
+                // Far range: choose Attack 1 (Gun) or Attack 4 (Burst)
+                attackType = (Math.random() < 0.6) ? 1 : 4;
+            }
+
+            // Assign attack sprite sheet and frame count
+            if (attackType == 1 && attack1Sheet != null) {
+                attackSheet = attack1Sheet;
+                attackFrames = 8;
+            } else if (attackType == 2 && attack2Sheet != null) {
+                attackSheet = attack2Sheet;
+                attackFrames = 6;
+            } else if (attackType == 3 && attack3Sheet != null) {
+                attackSheet = attack3Sheet;
+                attackFrames = 4;
+            } else if (attackType == 4 && attack4Sheet != null) {
+                attackSheet = attack4Sheet;
+                attackFrames = 6;
+            }
+
             currentState = STATE_ATTACK;
             spriteNum = 0;
             spriteCounter = 0;
             firedThisAttack = false;
         } else {
-            currentState = STATE_IDLE;
+            // Walk toward player if far away, otherwise idle
+            if (distToPlayer > 120 && distToPlayer < 450) {
+                currentState = STATE_WALK;
+                x += (int) (speed * facingDirection);
+            } else {
+                currentState = STATE_IDLE;
+            }
         }
     }
 
     @Override
     protected void onDefeated() {
         super.onDefeated();
-        // Fountain of item rewards for defeating the boss!
+        // Generous item drop rewards for defeating Boss 2!
         if (gp != null && gp.items != null) {
-            for (int i = 0; i < 5; i++) {
-                gp.items.add(new Item(x + 10 + i * 6, y));
+            for (int i = 0; i < 7; i++) {
+                gp.items.add(new Item(x + 5 + i * 8, y));
             }
         }
     }
@@ -92,22 +177,21 @@ public class BossEnemy extends Enemy {
         super.draw(g2);
 
         // Draw Screen-Wide Boss Health Bar if player is near or inside boss room
-        if (!isDead() && gp.player.x >= gp.tileSize * 95) {
+        if (!isDead() && gp.player != null && gp.player.x >= gp.tileSize * 95) {
             drawBossScreenHealthBar(g2);
         }
     }
 
     private void drawBossScreenHealthBar(Graphics2D g2) {
-        // Draw in screen space (compensate for camera translation)
-        int screenBarW = 400;
-        int screenBarH = 14;
+        int screenBarW = 420;
+        int screenBarH = 16;
         int screenBarX = gp.cameraX + (gp.screenWidth - screenBarW) / 2;
         int screenBarY = 40;
 
         // Boss Title
         g2.setColor(new Color(255, 215, 0));
         g2.setFont(new Font("Monospaced", Font.BOLD, 15));
-        String title = "BOSS: CYBER TANK GUARDIAN";
+        String title = "BOSS: CYBER ENFORCER";
         int titleW = g2.getFontMetrics().stringWidth(title);
         g2.drawString(title, gp.cameraX + (gp.screenWidth - titleW) / 2, screenBarY - 8);
 

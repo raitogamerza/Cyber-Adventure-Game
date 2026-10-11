@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import game.Map1.Platform;
 
@@ -29,12 +30,23 @@ public class EnemyProjectile extends GameObject {
     private LinkedList<TrailPoint> trail = new LinkedList<>();
     private static final int MAX_TRAIL_LENGTH = 4;
 
+    private BufferedImage sprite;
+
     public EnemyProjectile(GamePanel gp, int x, int y, int direction) {
-        super(x, y, 12, 6);
+        this(gp, x, y, direction, null);
+    }
+
+    public EnemyProjectile(GamePanel gp, int x, int y, int direction, BufferedImage sprite) {
+        super(x, y, 14, 8);
         this.gp = gp;
         this.direction = direction;
         this.vx = 9.0 * direction;
         this.vy = 0;
+        this.sprite = sprite;
+        if (sprite != null) {
+            this.width = sprite.getWidth() * 2;
+            this.height = sprite.getHeight() * 2;
+        }
     }
 
     public EnemyProjectile(GamePanel gp, int x, int y, double vx, double vy) {
@@ -109,10 +121,18 @@ public class EnemyProjectile extends GameObject {
         g2.setColor(new Color(255, 100, 0, 100));
         g2.fillRoundRect(x - 2, y - 2, width + 4, height + 4, 6, 6);
 
-        // 3. Core glowing laser
-        g2.setColor(new Color(255, 50, 20));
-        g2.fillRoundRect(x, y, width, height, 4, 4);
-        g2.setColor(Color.WHITE);
-        g2.fillRoundRect(x + 2, y + 1, width - 4, height - 2, 2, 2);
+        if (sprite != null) {
+            if (direction == 1) {
+                g2.drawImage(sprite, x, y, width, height, null);
+            } else {
+                g2.drawImage(sprite, x + width, y, -width, height, null);
+            }
+        } else {
+            // 3. Core glowing laser
+            g2.setColor(new Color(255, 50, 20));
+            g2.fillRoundRect(x, y, width, height, 4, 4);
+            g2.setColor(Color.WHITE);
+            g2.fillRoundRect(x + 2, y + 1, width - 4, height - 2, 2, 2);
+        }
     }
 }

@@ -78,6 +78,9 @@ public abstract class Enemy extends GameObject implements Attackable {
             if (fWalk.exists()) walkSheet = ImageIO.read(fWalk);
 
             File fAttack = new File(folder + "/Attack.png");
+            if (!fAttack.exists()) {
+                fAttack = new File(folder + "/Attack1.png");
+            }
             if (fAttack.exists()) attackSheet = ImageIO.read(fAttack);
 
             File fHurt = new File(folder + "/Hurt.png");
@@ -274,15 +277,18 @@ public abstract class Enemy extends GameObject implements Attackable {
                 break;
         }
 
+        int fWidth = (currentSheet != null) ? (currentSheet.getWidth() / Math.max(1, totalFrames)) : FRAME_SIZE;
+        int fHeight = (currentSheet != null) ? currentSheet.getHeight() : FRAME_SIZE;
+
         int frameIndex = spriteNum % Math.max(1, totalFrames);
-        int sx1 = frameIndex * FRAME_SIZE;
+        int sx1 = frameIndex * fWidth;
         int sy1 = 0;
-        int sx2 = sx1 + FRAME_SIZE;
-        int sy2 = FRAME_SIZE;
+        int sx2 = sx1 + fWidth;
+        int sy2 = fHeight;
 
         // Center sprite horizontally over hitbox, align feet at bottom
-        int drawX = x - (FRAME_SIZE - width) / 2;
-        int drawY = y + height - FRAME_SIZE;
+        int drawX = x - (fWidth - width) / 2;
+        int drawY = y + height - fHeight;
 
         if (currentSheet != null) {
             Composite origComp = g2.getComposite();
@@ -294,11 +300,11 @@ public abstract class Enemy extends GameObject implements Attackable {
 
             if (facingDirection == 1) {
                 // Facing right
-                g2.drawImage(currentSheet, drawX, drawY, drawX + FRAME_SIZE, drawY + FRAME_SIZE,
+                g2.drawImage(currentSheet, drawX, drawY, drawX + fWidth, drawY + fHeight,
                         sx1, sy1, sx2, sy2, null);
             } else {
                 // Facing left (horizontal flip)
-                g2.drawImage(currentSheet, drawX + FRAME_SIZE, drawY, drawX, drawY + FRAME_SIZE,
+                g2.drawImage(currentSheet, drawX + fWidth, drawY, drawX, drawY + fHeight,
                         sx1, sy1, sx2, sy2, null);
             }
 
