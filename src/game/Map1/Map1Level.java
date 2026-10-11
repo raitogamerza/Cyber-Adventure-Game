@@ -146,12 +146,6 @@ public class Map1Level {
         
         // Boss Room Right Wall (Tile 130)
         gp.platforms.add(new Platform(t * 130, gp.screenHeight - t * 14, t * 2, t * 14));
-        
-        // Boss Room Ceiling / Floating platforms for the boss fight
-        gp.platforms.add(new Platform(t * 105, gp.screenHeight - t * 7, t * 5, t * 1));
-        gp.platforms.add(new Platform(t * 118, gp.screenHeight - t * 7, t * 5, t * 1));
-        gp.platforms.add(new Platform(t * 111, gp.screenHeight - t * 10, t * 6, t * 1));
-
         // Boss Room Decorations
         gp.decorations.add(new Decoration(t * 102, gp.screenHeight - t * 5, t * 26, t * 2, "src/game/Map1/3 Objects/Fence/1.png").setRepeatX(true));
         gp.decorations.add(new Decoration(t * 108, gp.screenHeight - t * 9, t * 12, t * 6, "src/game/Map1/3 Objects/Other/Tree4.png").setKeepAspect(true)); // Big tree in background
@@ -182,10 +176,20 @@ public class Map1Level {
         gp.enemies.add(new GunslingerEnemy(gp, t * 44, groundY, t * 41, t * 47));
 
         // [Area 4: Boss Room]
-        gp.enemies.add(new BossEnemy(gp, t * 116, gp.screenHeight - t * 3 - 56));
-        gp.enemies.add(new DroneEnemy(gp, t * 108, gp.screenHeight - t * 8, t * 103, t * 112, 4));
-        gp.enemies.add(new DroneEnemy(gp, t * 116, gp.screenHeight - t * 9, t * 112, t * 121, 5));
-        gp.enemies.add(new DroneEnemy(gp, t * 123, gp.screenHeight - t * 7, t * 119, t * 127, 4));
+        BossEnemy boss = new BossEnemy(gp, t * 116, gp.screenHeight - t * 3 - 56);
+        gp.enemies.add(boss);
+
+        DroneEnemy drone1 = new DroneEnemy(gp, t * 108, gp.screenHeight - t * 8, t * 103, t * 112, 4);
+        DroneEnemy drone2 = new DroneEnemy(gp, t * 116, gp.screenHeight - t * 9, t * 112, t * 121, 5);
+        DroneEnemy drone3 = new DroneEnemy(gp, t * 123, gp.screenHeight - t * 7, t * 119, t * 127, 4);
+
+        boss.addMinion(drone1);
+        boss.addMinion(drone2);
+        boss.addMinion(drone3);
+
+        gp.enemies.add(drone1);
+        gp.enemies.add(drone2);
+        gp.enemies.add(drone3);
     }
 
     public void drawBackground(Graphics2D g2, int cameraX) {

@@ -11,6 +11,11 @@ public class DroneEnemy extends Enemy {
     private double hoverAngle = 0;
     private int shootCooldown = 20;
     private boolean firedThisAttack = false;
+    private Enemy linkedBoss;
+
+    public void setLinkedBoss(Enemy boss) {
+        this.linkedBoss = boss;
+    }
 
     public DroneEnemy(GamePanel gp, int x, int y, int patrolLeft, int patrolRight, int droneType) {
         super(gp, x, y, 26, 32, 2, 1.8);
@@ -30,6 +35,14 @@ public class DroneEnemy extends Enemy {
 
     @Override
     protected void updateAI() {
+        // If linked boss is defeated, drone self-destructs immediately
+        if (linkedBoss != null && (linkedBoss.isDead() || !linkedBoss.active)) {
+            if (!isDead()) {
+                takeDamage(999);
+            }
+            return;
+        }
+
         if (shootCooldown > 0) shootCooldown--;
 
         // Floating hover effect

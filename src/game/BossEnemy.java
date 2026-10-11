@@ -5,6 +5,8 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import javax.imageio.ImageIO;
 
 /**
@@ -17,6 +19,26 @@ public class BossEnemy extends Enemy {
     private boolean firedThisAttack = false;
     private static BufferedImage bulletImg;
     private static boolean bulletLoaded = false;
+
+    // Helper minions (e.g. boss room drones that die when boss dies)
+    private List<Enemy> minions = new ArrayList<>();
+
+    public void addMinion(Enemy minion) {
+        if (minion != null) {
+            minions.add(minion);
+            if (minion instanceof DroneEnemy) {
+                ((DroneEnemy) minion).setLinkedBoss(this);
+            }
+        }
+    }
+
+    public void killMinions() {
+        for (Enemy minion : minions) {
+            if (minion != null && !minion.isDead()) {
+                minion.takeDamage(999);
+            }
+        }
+    }
 
     // Additional attack animations for Boss 2
     private BufferedImage attack1Sheet;
@@ -162,8 +184,17 @@ public class BossEnemy extends Enemy {
     }
 
     @Override
+    public void takeDamage(int amount) {
+        super.takeDamage(amount);
+        if (isDead()) {
+            killMinions();
+        }
+    }
+
+    @Override
     protected void onDefeated() {
         super.onDefeated();
+        killMinions();
         // Generous item drop rewards for defeating Boss 2!
         if (gp != null && gp.items != null) {
             for (int i = 0; i < 7; i++) {
