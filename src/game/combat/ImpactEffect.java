@@ -1,4 +1,4 @@
-package game;
+package game.combat;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;

@@ -1,4 +1,8 @@
-package game;
+package game.enemy;
+
+import game.GamePanel;
+import game.combat.EnemyProjectile;
+import game.combat.MuzzleFlash;
 
 /**
  * Ranged gunslinger enemy (Enemy Type 2).

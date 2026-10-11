@@ -1,7 +1,15 @@
-package game;
+package game.player;
+
+import game.Attackable;
+import game.GameObject;
+import game.GamePanel;
+import game.KeyHandler;
+import game.Map1.Platform;
+import game.combat.ImpactEffect;
+import game.combat.MuzzleFlash;
+import game.combat.Projectile;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import game.Map1.Platform;
 
 public class Player extends GameObject implements Attackable {
     GamePanel gp;
@@ -15,7 +23,7 @@ public class Player extends GameObject implements Attackable {
 
     // Movement
     int speed = 5;
-    double velocityY = 0;
+    public double velocityY = 0;
     double gravity = 0.5;
     double jumpStrength = -12;
     double maxFallSpeed = 15; // กัน tunneling ทะลุ platform เวลาตกเร็วๆ
@@ -25,7 +33,7 @@ public class Player extends GameObject implements Attackable {
     // Shooting
     int shootCooldown = 0;
     int shootFlash = 0;       // จำนวนเฟรมที่โชว์ภาพปืนตอนยิง
-    int facingDirection = 1;  // 1 = right, -1 = left
+    public int facingDirection = 1;  // 1 = right, -1 = left
 
     int runAnimGrace = 0; // กัน animation วิ่งกระพริบตอน key-repeat
 
@@ -112,11 +120,8 @@ public class Player extends GameObject implements Attackable {
         if (x < 0) x = 0;
         if (x > gp.mapWidth - width) x = gp.mapWidth - width;
         if (y > gp.screenHeight) { // ตกหลุม
-            x = 100;
-            y = 300;
-            posY = 300;
-            velocityY = 0;
-            isGrounded = false;
+            health = 0;
+            gp.gameState = GamePanel.STATE_GAMEOVER;
         }
 
         // ---------- 4) Shooting ----------
@@ -158,7 +163,7 @@ public class Player extends GameObject implements Attackable {
             gp.effects.add(new ImpactEffect(x + width / 2, y + height / 2, -facingDirection));
         }
         if (isDead()) {
-            respawn();
+            gp.gameState = GamePanel.STATE_GAMEOVER;
         }
     }
 

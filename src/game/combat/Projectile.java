@@ -1,5 +1,9 @@
-package game;
+package game.combat;
 
+import game.GameObject;
+import game.GamePanel;
+import game.Map1.Platform;
+import game.enemy.Enemy;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
@@ -9,7 +13,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.LinkedList;
 import javax.imageio.ImageIO;
-import game.Map1.Platform;
 
 /**
  * Projectile with neon energy bullet rendering, tracer trail, and platform impact detection.

@@ -1,5 +1,10 @@
-package game;
+package game.enemy;
 
+import game.GamePanel;
+import game.combat.EnemyProjectile;
+import game.combat.ImpactEffect;
+import game.combat.MuzzleFlash;
+import game.world.Item;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -200,6 +205,10 @@ public class BossEnemy extends Enemy {
             for (int i = 0; i < 7; i++) {
                 gp.items.add(new Item(x + 5 + i * 8, y));
             }
+        }
+        // Trigger Level Clear Screen!
+        if (gp != null) {
+            gp.triggerLevelClear();
         }
     }
 

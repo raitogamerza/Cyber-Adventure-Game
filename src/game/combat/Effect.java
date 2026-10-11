@@ -1,5 +1,6 @@
-package game;
+package game.combat;
 
+import game.GameObject;
 import java.awt.Graphics2D;
 
 /**

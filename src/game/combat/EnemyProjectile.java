@@ -1,5 +1,8 @@
-package game;
+package game.combat;
 
+import game.GameObject;
+import game.GamePanel;
+import game.Map1.Platform;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
@@ -7,7 +10,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.LinkedList;
-import game.Map1.Platform;
 
 /**
  * Projectile fired by enemies (such as Gunslinger and Boss).

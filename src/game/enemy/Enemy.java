@@ -1,5 +1,11 @@
-package game;
+package game.enemy;
 
+import game.Attackable;
+import game.GameObject;
+import game.GamePanel;
+import game.Map1.Platform;
+import game.combat.ImpactEffect;
+import game.world.Item;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
@@ -8,7 +14,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
-import game.Map1.Platform;
 
 /**
  * Abstract base class for all enemies in the game.

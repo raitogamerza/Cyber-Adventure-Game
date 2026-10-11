@@ -1,4 +1,7 @@
-package game;
+package game.enemy;
+
+import game.GamePanel;
+import game.combat.ImpactEffect;
 
 /**
  * Fast skateboarder punk (Enemy Type 3).

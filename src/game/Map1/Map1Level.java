@@ -1,8 +1,8 @@
 package game.Map1;
 
-import game.Decoration;
 import game.GamePanel;
-import game.Portal;
+import game.enemy.*;
+import game.world.*;
 import game.*;
 
 import java.awt.Graphics2D;

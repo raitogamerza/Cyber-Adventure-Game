@@ -1,4 +1,7 @@
-package game;
+package game.enemy;
+
+import game.GamePanel;
+import game.combat.ImpactEffect;
 
 /**
  * Melee enemy with baseball bat (Enemy Type 1).

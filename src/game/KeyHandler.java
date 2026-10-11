@@ -4,6 +4,13 @@ import java.awt.event.KeyListener;
 
 public class KeyHandler implements KeyListener {
     public boolean leftPressed, rightPressed, jumpPressed, shootPressed;
+    public GamePanel gp;
+
+    public KeyHandler() {}
+
+    public KeyHandler(GamePanel gp) {
+        this.gp = gp;
+    }
 
     @Override
     public void keyTyped(KeyEvent e) {}
@@ -11,6 +18,15 @@ public class KeyHandler implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
+        if (code == KeyEvent.VK_ESCAPE) {
+            if (gp != null) {
+                if (gp.gameState == GamePanel.STATE_PLAY) {
+                    gp.gameState = GamePanel.STATE_MENU;
+                } else if (gp.gameState == GamePanel.STATE_LEVEL_SELECT) {
+                    gp.gameState = GamePanel.STATE_MENU;
+                }
+            }
+        }
         if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
             leftPressed = true;
         }

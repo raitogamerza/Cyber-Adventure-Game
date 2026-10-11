@@ -1,4 +1,6 @@
-package game;
+package game.world;
+
+import game.GameObject;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
