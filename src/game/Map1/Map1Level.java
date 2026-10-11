@@ -3,6 +3,7 @@ package game.Map1;
 import game.Decoration;
 import game.GamePanel;
 import game.Portal;
+import game.*;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -163,6 +164,25 @@ public class Map1Level {
         gp.decorations.add(new Decoration(t * 128, gp.screenHeight - t * 4, t, t, "src/game/Map1/3 Objects/Bushes/7.png").setKeepAspect(true));
         gp.decorations.add(new Decoration(t * 106, gp.screenHeight - t * 3 - 32, 32, 32, "src/game/Map1/3 Objects/Stones/2.png").setKeepAspect(true));
         gp.decorations.add(new Decoration(t * 125, gp.screenHeight - t * 3 - 32, 32, 32, "src/game/Map1/3 Objects/Stones/3.png").setKeepAspect(true));
+
+        // --- Enemies Spawn (Polymorphic Enemy Hierarchy) ---
+        int groundY = gp.screenHeight - t * 3 - 42;
+
+        // [Area 1: Starting Ground]
+        gp.enemies.add(new BrawlerEnemy(gp, t * 6, groundY, t * 4, t * 9));
+
+        // [Area 2: Middle Ground & Air]
+        gp.enemies.add(new SkaterEnemy(gp, t * 15, groundY, t * 13, t * 20));
+        gp.enemies.add(new GunslingerEnemy(gp, t * 24, groundY, t * 21, t * 27));
+        gp.enemies.add(new DroneEnemy(gp, t * 18, gp.screenHeight - t * 8, t * 15, t * 22, 4));
+        gp.enemies.add(new DroneEnemy(gp, t * 28, gp.screenHeight - t * 7, t * 26, t * 31, 5));
+
+        // [Area 3: Right Ground]
+        gp.enemies.add(new BrawlerEnemy(gp, t * 36, groundY, t * 33, t * 40));
+        gp.enemies.add(new GunslingerEnemy(gp, t * 44, groundY, t * 41, t * 47));
+
+        // [Area 4: Boss Room]
+        gp.enemies.add(new BossEnemy(gp, t * 116, gp.screenHeight - t * 3 - 44));
     }
 
     public void drawBackground(Graphics2D g2, int cameraX) {

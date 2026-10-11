@@ -22,9 +22,12 @@ public class GamePanel extends JPanel implements Runnable {
     KeyHandler keyH = new KeyHandler();
 
     // OOP: Storing objects using the abstract GameObject or specific classes
-    Player player;
+    public Player player;
     public List<Platform> platforms = new ArrayList<>();
     public List<Projectile> projectiles = new ArrayList<>();
+    public List<Effect> effects = new ArrayList<>();
+    public List<Enemy> enemies = new ArrayList<>();
+    public List<EnemyProjectile> enemyProjectiles = new ArrayList<>();
     // public Target target; // User requested no monsters
     public List<Item> items = new ArrayList<>();
     public List<Decoration> decorations = new ArrayList<>();
@@ -89,6 +92,35 @@ public class GamePanel extends JPanel implements Runnable {
             }
         }
 
+        Iterator<Effect> effIt = effects.iterator();
+        while (effIt.hasNext()) {
+            Effect eff = effIt.next();
+            eff.update();
+            if (!eff.active) {
+                effIt.remove();
+            }
+        }
+
+        // Enemies update (Polymorphic update on all enemy types)
+        Iterator<Enemy> enemyIt = enemies.iterator();
+        while (enemyIt.hasNext()) {
+            Enemy enemy = enemyIt.next();
+            enemy.update();
+            if (!enemy.active) {
+                enemyIt.remove();
+            }
+        }
+
+        // Enemy projectiles update
+        Iterator<EnemyProjectile> epIt = enemyProjectiles.iterator();
+        while (epIt.hasNext()) {
+            EnemyProjectile ep = epIt.next();
+            ep.update();
+            if (!ep.active) {
+                epIt.remove();
+            }
+        }
+
         Iterator<Item> itemIt = items.iterator();
         while (itemIt.hasNext()) {
             Item item = itemIt.next();
@@ -123,11 +155,53 @@ public class GamePanel extends JPanel implements Runnable {
         for (Portal portal : portals) portal.draw(g2);
         for (Platform p : platforms) p.draw(g2);
         for (Item item : items) item.draw(g2);
+        for (Enemy enemy : enemies) enemy.draw(g2);
+        for (EnemyProjectile ep : enemyProjectiles) ep.draw(g2);
         player.draw(g2);
         for (Projectile p : projectiles) p.draw(g2);
+        for (Effect eff : effects) eff.draw(g2);
 
         g2.translate(cameraX, 0); // Reset Camera Translation
 
+        // --- HUD Overlay (Fixed Screen Space) ---
+        drawHUD(g2);
+
         g2.dispose();
+    }
+
+    private void drawHUD(Graphics2D g2) {
+        if (player == null) return;
+
+        int hudX = 20;
+        int hudY = 20;
+        int barW = 180;
+        int barH = 16;
+
+        // HUD Background Frame
+        g2.setColor(new Color(15, 15, 30, 210));
+        g2.fillRoundRect(hudX - 8, hudY - 8, barW + 50, barH + 16, 8, 8);
+        g2.setColor(new Color(0, 210, 255));
+        g2.drawRoundRect(hudX - 8, hudY - 8, barW + 50, barH + 16, 8, 8);
+
+        // Label
+        g2.setColor(new Color(0, 210, 255));
+        g2.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 12));
+        g2.drawString("HP", hudX, hudY + 12);
+
+        // Bar Track
+        int trackX = hudX + 24;
+        g2.setColor(new Color(40, 40, 60));
+        g2.fillRoundRect(trackX, hudY, barW, barH, 4, 4);
+
+        // Health Fill
+        double ratio = (double) player.getHealth() / player.getMaxHealth();
+        int fillW = (int) (ratio * barW);
+        Color hpColor = (ratio > 0.5) ? new Color(0, 220, 120) : (ratio > 0.25 ? new Color(255, 180, 0) : new Color(230, 40, 40));
+        g2.setColor(hpColor);
+        g2.fillRoundRect(trackX, hudY, fillW, barH, 4, 4);
+
+        // Border
+        g2.setColor(Color.WHITE);
+        g2.drawRoundRect(trackX, hudY, barW, barH, 4, 4);
     }
 }

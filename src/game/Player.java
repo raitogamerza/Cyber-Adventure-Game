@@ -3,10 +3,15 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import game.Map1.Platform;
 
-public class Player extends GameObject {
+public class Player extends GameObject implements Attackable {
     GamePanel gp;
     KeyHandler keyH;
     PlayerAnimator animator;
+
+    // Health & Combat
+    private int health = 100;
+    private int maxHealth = 100;
+    public int invulnerableTimer = 0;
 
     // Movement
     int speed = 5;
@@ -118,14 +123,19 @@ public class Player extends GameObject {
         if (shootCooldown > 0) shootCooldown--;
         if (shootFlash > 0) shootFlash--;
         if (keyH.shootPressed && shootCooldown <= 0) {
-            gp.projectiles.add(new Projectile(
-                facingDirection == 1 ? x + width : x,
-                y + 16,
-                facingDirection
-            ));
+            int gunTipX = (facingDirection == 1) ? (x + 30) : (x - 8);
+            int gunTipY = y + 26;
+
+            gp.projectiles.add(new Projectile(gp, gunTipX, gunTipY, facingDirection));
+            if (gp.effects != null) {
+                gp.effects.add(new MuzzleFlash(gunTipX, gunTipY, facingDirection));
+            }
             shootCooldown = 12;
             shootFlash = 6;
         }
+
+        // Invulnerability timer
+        if (invulnerableTimer > 0) invulnerableTimer--;
 
         // ---------- 5) Animation ----------
         int newState;
@@ -140,7 +150,48 @@ public class Player extends GameObject {
     }
 
     @Override
+    public void takeDamage(int amount) {
+        if (invulnerableTimer > 0) return;
+        health = Math.max(0, health - amount);
+        invulnerableTimer = 45; // ~0.75 seconds immunity frames
+        if (gp.effects != null) {
+            gp.effects.add(new ImpactEffect(x + width / 2, y + height / 2, -facingDirection));
+        }
+        if (isDead()) {
+            respawn();
+        }
+    }
+
+    public void respawn() {
+        health = maxHealth;
+        x = 100;
+        y = 300;
+        posY = 300;
+        velocityY = 0;
+        isGrounded = false;
+    }
+
+    @Override
+    public boolean isDead() {
+        return health <= 0;
+    }
+
+    @Override
+    public int getHealth() {
+        return health;
+    }
+
+    @Override
+    public int getMaxHealth() {
+        return maxHealth;
+    }
+
+    @Override
     public void draw(Graphics2D g2) {
+        // Flash during invulnerability
+        if (invulnerableTimer > 0 && (invulnerableTimer % 6 < 3)) {
+            return; // Skip rendering frame for flicker effect
+        }
         animator.draw(g2, x, y, width, height, facingDirection, shootFlash > 0);
     }
 }
