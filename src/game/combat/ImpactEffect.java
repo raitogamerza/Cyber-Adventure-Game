@@ -58,18 +58,37 @@ public class ImpactEffect extends Effect {
     private int ringLife = 0;
     private final int ringMaxLife = 6;
     private static final Random rand = new Random();
+    private int type = 1;
 
-    public ImpactEffect(int x, int y, int normalDirection) {
+    public ImpactEffect(int x, int y, int normalDirection, int type) {
         super(x, y, 16, 16);
+        this.type = (type >= 0 && type <= 2) ? type : 1;
 
         // Spawn 8-12 spark particles
         int sparkCount = 8 + rand.nextInt(5);
-        Color[] sparkColors = {
-            Color.WHITE,
-            new Color(180, 240, 255),
-            new Color(0, 220, 255),
-            new Color(0, 150, 255)
-        };
+        Color[] sparkColors;
+        if (this.type == 0) { // Biker: fiery sparks
+            sparkColors = new Color[] {
+                Color.WHITE,
+                new Color(255, 210, 60),
+                new Color(255, 120, 20),
+                new Color(255, 50, 0)
+            };
+        } else if (this.type == 2) { // Cyborg: neon magenta/laser sparks
+            sparkColors = new Color[] {
+                Color.WHITE,
+                new Color(255, 180, 230),
+                new Color(255, 40, 120),
+                new Color(220, 0, 100)
+            };
+        } else { // Punk: electric cyan sparks
+            sparkColors = new Color[] {
+                Color.WHITE,
+                new Color(180, 240, 255),
+                new Color(0, 220, 255),
+                new Color(0, 150, 255)
+            };
+        }
 
         for (int i = 0; i < sparkCount; i++) {
             // Velocity angled outwards based on normalDirection
@@ -86,6 +105,10 @@ public class ImpactEffect extends Effect {
 
             sparks.add(new Spark(x, y, vx, vy, size, c, maxLife));
         }
+    }
+
+    public ImpactEffect(int x, int y, int normalDirection) {
+        this(x, y, normalDirection, 1);
     }
 
     @Override
@@ -116,7 +139,9 @@ public class ImpactEffect extends Effect {
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ringAlpha));
 
             int radius = 3 + ringLife * 3;
-            g2.setColor(new Color(150, 230, 255));
+            Color ringColor = (type == 0) ? new Color(255, 160, 40) :
+                              (type == 2 ? new Color(255, 100, 180) : new Color(150, 230, 255));
+            g2.setColor(ringColor);
             g2.drawOval(x - radius, y - radius, radius * 2, radius * 2);
 
             // Small bright center flash in first 2 frames

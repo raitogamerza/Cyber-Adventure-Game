@@ -18,11 +18,15 @@ public class KeyHandler implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
-        if (code == KeyEvent.VK_ESCAPE) {
+        if (code == KeyEvent.VK_ESCAPE || code == KeyEvent.VK_P) {
             if (gp != null) {
                 if (gp.gameState == GamePanel.STATE_PLAY) {
-                    gp.gameState = GamePanel.STATE_MENU;
+                    gp.gameState = GamePanel.STATE_PAUSED;
+                } else if (gp.gameState == GamePanel.STATE_PAUSED) {
+                    gp.gameState = GamePanel.STATE_PLAY;
                 } else if (gp.gameState == GamePanel.STATE_LEVEL_SELECT) {
+                    gp.gameState = GamePanel.STATE_CHARACTER_SELECT;
+                } else if (gp.gameState == GamePanel.STATE_CHARACTER_SELECT) {
                     gp.gameState = GamePanel.STATE_MENU;
                 }
             }

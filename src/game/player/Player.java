@@ -36,13 +36,42 @@ public class Player extends GameObject implements Attackable {
     public int facingDirection = 1;  // 1 = right, -1 = left
 
     int runAnimGrace = 0; // กัน animation วิ่งกระพริบตอน key-repeat
+    public int characterIndex = 1;
 
     public Player(GamePanel gp, KeyHandler keyH) {
+        this(gp, keyH, gp != null ? gp.selectedCharacterIndex : 1);
+    }
+
+    public Player(GamePanel gp, KeyHandler keyH, int characterIndex) {
         super(100, 300, 24, 48); // Player size
         this.gp = gp;
         this.keyH = keyH;
         this.posY = y;
-        this.animator = new PlayerAnimator();
+        this.animator = new PlayerAnimator(characterIndex);
+        applyCharacterStats(characterIndex);
+    }
+
+    public void applyCharacterStats(int index) {
+        this.characterIndex = index;
+        if (animator != null) {
+            animator.loadCharacter(index);
+        }
+        if (index == 0) { // Biker: Tanky Brawler
+            maxHealth = 120;
+            health = 120;
+            speed = 5;
+            jumpStrength = -12;
+        } else if (index == 2) { // Cyborg: Swift & Agile Infiltrator
+            maxHealth = 90;
+            health = 90;
+            speed = 6;
+            jumpStrength = -13;
+        } else { // Punk (index 1): Balanced Street Rebel
+            maxHealth = 100;
+            health = 100;
+            speed = 5;
+            jumpStrength = -12;
+        }
     }
 
     @Override
@@ -131,12 +160,22 @@ public class Player extends GameObject implements Attackable {
             int gunTipX = (facingDirection == 1) ? (x + 30) : (x - 8);
             int gunTipY = y + 26;
 
-            gp.projectiles.add(new Projectile(gp, gunTipX, gunTipY, facingDirection));
+            gp.projectiles.add(new Projectile(gp, gunTipX, gunTipY, facingDirection, characterIndex));
             if (gp.effects != null) {
-                gp.effects.add(new MuzzleFlash(gunTipX, gunTipY, facingDirection));
+                gp.effects.add(new MuzzleFlash(gunTipX, gunTipY, facingDirection, characterIndex));
             }
-            shootCooldown = 12;
-            shootFlash = 6;
+
+            // Weapon-specific cadence and flash duration
+            if (characterIndex == 0) { // Biker: Heavy Shotgun
+                shootCooldown = 16;
+                shootFlash = 7;
+            } else if (characterIndex == 2) { // Cyborg: Rapid Laser Blaster
+                shootCooldown = 9;
+                shootFlash = 4;
+            } else { // Punk: Balanced Plasma SMG
+                shootCooldown = 12;
+                shootFlash = 5;
+            }
         }
 
         // Invulnerability timer

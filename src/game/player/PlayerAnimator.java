@@ -22,20 +22,49 @@ public class PlayerAnimator {
     private int currentState = STATE_IDLE;
 
     public PlayerAnimator() {
-        loadImages();
+        this(1);
     }
 
-    private void loadImages() {
-        try {
-            // ใช้ภาพ 2 (เวอร์ชันไม่มีแขน) เพื่อให้วาดแขนแยกได้
-            idle = ImageIO.read(new File("src/game/All Player/1 Characters/2 Punk/Idle2.png"));
-            run = ImageIO.read(new File("src/game/All Player/1 Characters/2 Punk/Run2.png"));
-            jump = ImageIO.read(new File("src/game/All Player/1 Characters/2 Punk/Jump2.png"));
+    public PlayerAnimator(int characterIndex) {
+        loadCharacter(characterIndex);
+    }
 
-            // แขนและปืน
-            hand = ImageIO.read(new File("src/game/All Player/3 Hands/2 Punk/1.png"));
-            gunIdle = ImageIO.read(new File("src/game/All Player/2 Guns/1_1.png"));
-            gunShoot = ImageIO.read(new File("src/game/All Player/2 Guns/1_2.png"));
+    public void loadCharacter(int characterIndex) {
+        String charFolder;
+        String handFolder;
+        String gunIdleFile;
+        String gunShootFile;
+
+        switch (characterIndex) {
+            case 0: // Biker
+                charFolder = "src/game/All Player/1 Characters/1 Biker";
+                handFolder = "src/game/All Player/3 Hands/1 Biker/1.png";
+                gunIdleFile = "src/game/All Player/2 Guns/3_1.png";
+                gunShootFile = "src/game/All Player/2 Guns/3_2.png";
+                break;
+            case 2: // Cyborg
+                charFolder = "src/game/All Player/1 Characters/3 Cyborg";
+                handFolder = "src/game/All Player/3 Hands/3 Cyborg/1.png";
+                gunIdleFile = "src/game/All Player/2 Guns/6_1.png";
+                gunShootFile = "src/game/All Player/2 Guns/6_2.png";
+                break;
+            case 1: // Punk
+            default:
+                charFolder = "src/game/All Player/1 Characters/2 Punk";
+                handFolder = "src/game/All Player/3 Hands/2 Punk/1.png";
+                gunIdleFile = "src/game/All Player/2 Guns/1_1.png";
+                gunShootFile = "src/game/All Player/2 Guns/1_2.png";
+                break;
+        }
+
+        try {
+            idle = ImageIO.read(new File(charFolder + "/Idle2.png"));
+            run = ImageIO.read(new File(charFolder + "/Run2.png"));
+            jump = ImageIO.read(new File(charFolder + "/Jump2.png"));
+
+            hand = ImageIO.read(new File(handFolder));
+            gunIdle = ImageIO.read(new File(gunIdleFile));
+            gunShoot = ImageIO.read(new File(gunShootFile));
         } catch (Exception e) {
             e.printStackTrace();
         }

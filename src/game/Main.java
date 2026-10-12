@@ -6,7 +6,7 @@ public class Main {
         JFrame window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
-        window.setTitle("2D Platformer Game - OOP Concept");
+        window.setTitle("Cyber Adventure - OOP Platformer");
 
         GamePanel gamePanel = new GamePanel();
         window.add(gamePanel);

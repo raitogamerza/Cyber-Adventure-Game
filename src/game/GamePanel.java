@@ -21,8 +21,11 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int STATE_PLAY = 2;
     public static final int STATE_GAMEOVER = 3;
     public static final int STATE_LEVEL_CLEAR = 4;
+    public static final int STATE_CHARACTER_SELECT = 5;
+    public static final int STATE_PAUSED = 6;
 
     public int gameState = STATE_MENU;
+    public int selectedCharacterIndex = 1; // 0 = Biker, 1 = Punk, 2 = Cyborg
     public UIManager uiManager;
     private int levelClearDelay = -1;
 
@@ -76,7 +79,7 @@ public class GamePanel extends JPanel implements Runnable {
         decorations.clear();
         portals.clear();
 
-        player.respawn();
+        player = new Player(this, keyH, selectedCharacterIndex);
         map1Level = new Map1Level(this);
         gameState = STATE_PLAY;
     }
@@ -100,7 +103,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     private void initGameObjects() {
-        player = new Player(this, keyH);
+        player = new Player(this, keyH, selectedCharacterIndex);
         map1Level = new Map1Level(this);
     }
 
@@ -239,6 +242,34 @@ public class GamePanel extends JPanel implements Runnable {
 
             // --- HUD Overlay (Fixed Screen Space) ---
             drawHUD(g2);
+            if (uiManager != null) {
+                uiManager.drawInGameHUD(g2);
+            }
+        } else if (gameState == STATE_PAUSED) {
+            // Draw frozen game world in background
+            if (map1Level != null) {
+                map1Level.drawBackground(g2, cameraX);
+            }
+
+            g2.translate(-cameraX, 0);
+            for (Decoration d : decorations) d.draw(g2);
+            for (Portal portal : portals) portal.draw(g2);
+            for (Platform p : platforms) p.draw(g2);
+            for (Item item : items) item.draw(g2);
+            for (Enemy enemy : enemies) enemy.draw(g2);
+            for (EnemyProjectile ep : enemyProjectiles) ep.draw(g2);
+            player.draw(g2);
+            for (Projectile p : projectiles) p.draw(g2);
+            for (Effect eff : effects) eff.draw(g2);
+            g2.translate(cameraX, 0);
+
+            // Draw HUD
+            drawHUD(g2);
+
+            // Draw Pause Menu Screen modal overlay
+            if (uiManager != null) {
+                uiManager.draw(g2);
+            }
         } else if (gameState == STATE_GAMEOVER) {
             // Draw frozen game world in background
             if (map1Level != null) {
