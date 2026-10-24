@@ -15,15 +15,17 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 /**
- * Boss enemy (Folder: All Boss / 2 - Cyber Enforcer).
- * Agile, high-tech boss equipped with ranged blaster (Bullet.png), 
- * multi-phase attack combos (Attack 1-4), and sneer taunts.
+ * Boss enemy class supporting both:
+ * - Boss 2: Cyber Enforcer (Map 1)
+ * - Boss 3: Cyber Juggernaut (Map 2)
+ * Demonstrates OOP Inheritance, Encapsulation, and Polymorphism.
  */
 public class BossEnemy extends Enemy {
+    private int bossType = 2;
+    private String bossTitle = "BOSS: CYBER ENFORCER";
     private int shootCooldown = 50;
     private boolean firedThisAttack = false;
-    private static BufferedImage bulletImg;
-    private static boolean bulletLoaded = false;
+    private BufferedImage bulletImg;
 
     // Helper minions (e.g. boss room drones that die when boss dies)
     private List<Enemy> minions = new ArrayList<>();
@@ -45,7 +47,7 @@ public class BossEnemy extends Enemy {
         }
     }
 
-    // Additional attack animations for Boss 2
+    // Additional attack animations
     private BufferedImage attack1Sheet;
     private BufferedImage attack2Sheet;
     private BufferedImage attack3Sheet;
@@ -55,19 +57,32 @@ public class BossEnemy extends Enemy {
     private int attackType = 1; // 1 = Ranged Shot, 2 = Melee Slash, 3 = Quick Strike, 4 = Heavy Burst
 
     public BossEnemy(GamePanel gp, int x, int y) {
-        super(gp, x, y, 44, 56, 35, 1.2);
+        this(gp, x, y, 2);
+    }
+
+    public BossEnemy(GamePanel gp, int x, int y, int bossType) {
+        super(gp, x, y, (bossType == 3 ? 48 : 44), (bossType == 3 ? 64 : 56), (bossType == 3 ? 50 : 35), (bossType == 3 ? 1.0 : 1.2));
+        this.bossType = bossType;
         this.idleFrames = 4;
         this.walkFrames = 6;
-        this.attackFrames = 8;
         this.deathFrames = 6;
         this.hurtFrames = 2;
         this.animSpeed = 6;
 
-        loadSprites("src/game/All enemies/All Boss/2", 6, 8, 6);
-        loadBoss2Assets("src/game/All enemies/All Boss/2");
+        if (bossType == 3) {
+            this.bossTitle = "BOSS: CYBER JUGGERNAUT";
+            this.attackFrames = 6;
+            loadSprites("src/game/All enemies/All Boss/3", 6, 6, 6);
+            loadBossAssets("src/game/All enemies/All Boss/3", "Ball.png");
+        } else {
+            this.bossTitle = "BOSS: CYBER ENFORCER";
+            this.attackFrames = 8;
+            loadSprites("src/game/All enemies/All Boss/2", 6, 8, 6);
+            loadBossAssets("src/game/All enemies/All Boss/2", "Bullet.png");
+        }
     }
 
-    private void loadBoss2Assets(String folder) {
+    private void loadBossAssets(String folder, String projectileName) {
         try {
             File f1 = new File(folder + "/Attack1.png");
             if (f1.exists()) attack1Sheet = ImageIO.read(f1);
@@ -84,12 +99,9 @@ public class BossEnemy extends Enemy {
             File fSneer = new File(folder + "/Sneer.png");
             if (fSneer.exists()) sneerSheet = ImageIO.read(fSneer);
 
-            if (!bulletLoaded) {
-                File fBullet = new File(folder + "/Bullet.png");
-                if (fBullet.exists()) {
-                    bulletImg = ImageIO.read(fBullet);
-                }
-                bulletLoaded = true;
+            File fProj = new File(folder + "/" + projectileName);
+            if (fProj.exists()) {
+                bulletImg = ImageIO.read(fProj);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -98,7 +110,7 @@ public class BossEnemy extends Enemy {
         // Set initial attack sheet to Attack1
         if (attack1Sheet != null) {
             attackSheet = attack1Sheet;
-            attackFrames = 8;
+            attackFrames = (bossType == 3 ? 6 : 8);
         }
     }
 
@@ -115,10 +127,10 @@ public class BossEnemy extends Enemy {
 
         if (currentState == STATE_ATTACK) {
             // Ranged Attack 1 or 4: Fire bullets
-            if ((attackType == 1 || attackType == 4) && (spriteNum == 4 || spriteNum == 5) && !firedThisAttack) {
+            if ((attackType == 1 || attackType == 4) && (spriteNum == 3 || spriteNum == 4) && !firedThisAttack) {
                 firedThisAttack = true;
                 int bulletX = (facingDirection == 1) ? (x + width + 4) : (x - 16);
-                int bulletY = y + 24;
+                int bulletY = y + (bossType == 3 ? 32 : 24);
 
                 if (gp != null && gp.enemyProjectiles != null) {
                     gp.enemyProjectiles.add(new EnemyProjectile(gp, bulletX, bulletY, facingDirection, bulletImg));
@@ -130,9 +142,9 @@ public class BossEnemy extends Enemy {
 
             // Melee Attack 2 or 3: Damage player if in close range during peak frame
             if ((attackType == 2 || attackType == 3) && spriteNum == 3 && !firedThisAttack) {
-                if (distToPlayer < 65 && Math.abs(gp.player.y - y) < 40) {
+                if (distToPlayer < (bossType == 3 ? 75 : 65) && Math.abs(gp.player.y - y) < 45) {
                     firedThisAttack = true;
-                    gp.player.takeDamage(15);
+                    gp.player.takeDamage(bossType == 3 ? 20 : 15);
                     if (gp.effects != null) {
                         gp.effects.add(new ImpactEffect(gp.player.x + gp.player.width / 2, gp.player.y + gp.player.height / 2, facingDirection));
                     }
@@ -142,7 +154,7 @@ public class BossEnemy extends Enemy {
             // End of attack animation
             if (spriteNum >= attackFrames - 1) {
                 currentState = STATE_IDLE;
-                shootCooldown = 45; // Cooldown before next action
+                shootCooldown = (bossType == 3 ? 40 : 45); // Cooldown before next action
             }
             return;
         }
@@ -150,7 +162,7 @@ public class BossEnemy extends Enemy {
         // Movement & Attack Decision
         if (shootCooldown <= 0) {
             // Choose attack based on distance
-            if (distToPlayer <= 80) {
+            if (distToPlayer <= (bossType == 3 ? 90 : 80)) {
                 // Close range: choose Attack 2 (Slash) or Attack 3 (Quick Strike)
                 attackType = (Math.random() < 0.5) ? 2 : 3;
             } else {
@@ -161,13 +173,13 @@ public class BossEnemy extends Enemy {
             // Assign attack sprite sheet and frame count
             if (attackType == 1 && attack1Sheet != null) {
                 attackSheet = attack1Sheet;
-                attackFrames = 8;
+                attackFrames = (bossType == 3 ? 6 : 8);
             } else if (attackType == 2 && attack2Sheet != null) {
                 attackSheet = attack2Sheet;
                 attackFrames = 6;
             } else if (attackType == 3 && attack3Sheet != null) {
                 attackSheet = attack3Sheet;
-                attackFrames = 4;
+                attackFrames = (bossType == 3 ? 6 : 4);
             } else if (attackType == 4 && attack4Sheet != null) {
                 attackSheet = attack4Sheet;
                 attackFrames = 6;
@@ -200,9 +212,9 @@ public class BossEnemy extends Enemy {
     protected void onDefeated() {
         super.onDefeated();
         killMinions();
-        // Generous item drop rewards for defeating Boss 2!
+        // Generous item drop rewards for defeating Boss!
         if (gp != null && gp.items != null) {
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < 8; i++) {
                 gp.items.add(new Item(x + 5 + i * 8, y));
             }
         }
@@ -231,7 +243,7 @@ public class BossEnemy extends Enemy {
         // Boss Title
         g2.setColor(new Color(255, 215, 0));
         g2.setFont(new Font("Monospaced", Font.BOLD, 15));
-        String title = "BOSS: CYBER ENFORCER";
+        String title = bossTitle;
         int titleW = g2.getFontMetrics().stringWidth(title);
         g2.drawString(title, gp.cameraX + (gp.screenWidth - titleW) / 2, screenBarY - 8);
 

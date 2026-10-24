@@ -14,10 +14,12 @@ public class Decoration extends GameObject {
 
     public Decoration(int x, int y, int width, int height, String imagePath) {
         super(x, y, width, height);
-        try {
-            image = ImageIO.read(new File(imagePath));
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (imagePath != null) {
+            try {
+                image = ImageIO.read(new File(imagePath));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import game.Map1.Map1Level;
+import game.Map2.Map2Level;
 import game.Map1.Platform;
 import game.GUI.UIManager;
 import game.player.Player;
@@ -24,7 +25,8 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int STATE_CHARACTER_SELECT = 5;
     public static final int STATE_PAUSED = 6;
 
-    public int gameState = STATE_MENU;
+    public volatile int gameState = STATE_MENU; // volatile: also read by Map2's FactoryThread
+    public int currentLevel = 1; // 1 = Cyber Outpost, 2 = Industrial Core
     public int selectedCharacterIndex = 1; // 0 = Biker, 1 = Punk, 2 = Cyborg
     public UIManager uiManager;
     private int levelClearDelay = -1;
@@ -51,6 +53,7 @@ public class GamePanel extends JPanel implements Runnable {
     public List<Decoration> decorations = new ArrayList<>();
     public List<Portal> portals = new ArrayList<>();
     public Map1Level map1Level;
+    public Map2Level map2Level;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -68,6 +71,11 @@ public class GamePanel extends JPanel implements Runnable {
         this.addMouseMotionListener(uiManager);
     }
 
+    public void startLevel(int level) {
+        this.currentLevel = level;
+        restartGame();
+    }
+
     public void restartGame() {
         levelClearDelay = -1;
         enemies.clear();
@@ -79,8 +87,18 @@ public class GamePanel extends JPanel implements Runnable {
         decorations.clear();
         portals.clear();
 
+        if (map2Level != null) {
+            map2Level.stop(); // end the old level's factory thread
+        }
+
         player = new Player(this, keyH, selectedCharacterIndex);
-        map1Level = new Map1Level(this);
+        if (currentLevel == 2) {
+            map1Level = null;
+            map2Level = new Map2Level(this);
+        } else {
+            map2Level = null;
+            map1Level = new Map1Level(this);
+        }
         gameState = STATE_PLAY;
     }
 
@@ -104,7 +122,11 @@ public class GamePanel extends JPanel implements Runnable {
 
     private void initGameObjects() {
         player = new Player(this, keyH, selectedCharacterIndex);
-        map1Level = new Map1Level(this);
+        if (currentLevel == 2) {
+            map2Level = new Map2Level(this);
+        } else {
+            map1Level = new Map1Level(this);
+        }
     }
 
     public void startGameThread() {
@@ -135,7 +157,10 @@ public class GamePanel extends JPanel implements Runnable {
     public void update() {
         if (gameState == STATE_PLAY) {
             player.update();
-            
+            if (map2Level != null) {
+                map2Level.update(); // conveyor belts + background clouds
+            }
+
             // Camera Follows Player
             cameraX = player.x - (screenWidth / 2) + (player.width / 2);
             if (cameraX < 0) cameraX = 0;
@@ -188,6 +213,11 @@ public class GamePanel extends JPanel implements Runnable {
                     itemIt.remove();
                 }
             }
+
+            // Decorations update (Supports AnimatedDecoration)
+            for (Decoration d : decorations) {
+                d.update();
+            }
             
             // Level Clear transition check
             if (levelClearDelay > 0) {
@@ -216,14 +246,20 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
+    public void drawWorldBackground(Graphics2D g2, int camX) {
+        if (currentLevel == 2 && map2Level != null) {
+            map2Level.drawBackground(g2, camX);
+        } else if (map1Level != null) {
+            map1Level.drawBackground(g2, camX);
+        }
+    }
+
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
         if (gameState == STATE_PLAY) {
-            if (map1Level != null) {
-                map1Level.drawBackground(g2, cameraX);
-            }
+            drawWorldBackground(g2, cameraX);
 
             g2.translate(-cameraX, 0); // Apply Camera Translation
 
@@ -247,9 +283,7 @@ public class GamePanel extends JPanel implements Runnable {
             }
         } else if (gameState == STATE_PAUSED) {
             // Draw frozen game world in background
-            if (map1Level != null) {
-                map1Level.drawBackground(g2, cameraX);
-            }
+            drawWorldBackground(g2, cameraX);
 
             g2.translate(-cameraX, 0);
             for (Decoration d : decorations) d.draw(g2);
@@ -272,9 +306,7 @@ public class GamePanel extends JPanel implements Runnable {
             }
         } else if (gameState == STATE_GAMEOVER) {
             // Draw frozen game world in background
-            if (map1Level != null) {
-                map1Level.drawBackground(g2, cameraX);
-            }
+            drawWorldBackground(g2, cameraX);
 
             g2.translate(-cameraX, 0);
             for (Decoration d : decorations) d.draw(g2);
@@ -294,9 +326,7 @@ public class GamePanel extends JPanel implements Runnable {
             }
         } else if (gameState == STATE_LEVEL_CLEAR) {
             // Draw victorious game world in background
-            if (map1Level != null) {
-                map1Level.drawBackground(g2, cameraX);
-            }
+            drawWorldBackground(g2, cameraX);
 
             g2.translate(-cameraX, 0);
             for (Decoration d : decorations) d.draw(g2);
@@ -361,7 +391,7 @@ public class GamePanel extends JPanel implements Runnable {
             int rem = getRemainingStageEnemies();
             int objX = hudX;
             int objY = hudY + 32;
-            int objW = 320;
+            int objW = 340;
             int objH = 26;
 
             g2.setColor(new Color(15, 15, 30, 215));
@@ -371,12 +401,14 @@ public class GamePanel extends JPanel implements Runnable {
                 g2.setColor(new Color(255, 75, 75));
                 g2.drawRoundRect(objX - 8, objY - 6, objW, objH, 6, 6);
                 g2.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 12));
-                g2.drawString("TARGETS: " + rem + " REMAINING | PORTAL LOCKED", objX, objY + 11);
+                String targetText = (currentLevel == 2) ? "FACTORY TARGETS: " : "TARGETS: ";
+                g2.drawString(targetText + rem + " REMAINING | PORTAL LOCKED", objX, objY + 11);
             } else {
                 g2.setColor(new Color(0, 255, 200));
                 g2.drawRoundRect(objX - 8, objY - 6, objW, objH, 6, 6);
                 g2.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 12));
-                g2.drawString("STAGE CLEAR! BOSS PORTAL UNLOCKED >>", objX, objY + 11);
+                String clearText = (currentLevel == 2) ? "CORE SECURED! FORGE PORTAL UNLOCKED >>" : "STAGE CLEAR! BOSS PORTAL UNLOCKED >>";
+                g2.drawString(clearText, objX, objY + 11);
             }
         }
     }
