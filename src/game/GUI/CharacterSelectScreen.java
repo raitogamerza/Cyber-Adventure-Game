@@ -130,7 +130,7 @@ public class CharacterSelectScreen extends UIScreen {
         String[] names = { "BIKER", "PUNK", "CYBORG" };
         String[] titles = { "HEAVY ENFORCER", "STREET REBEL", "CYBER INFILTRATOR" };
         String[] weapons = { "HEAVY SHOTGUN", "PLASMA SMG", "LASER BLASTER" };
-        int[] hps = { 120, 100, 90 };
+        int[] hps = { 140, 100, 90 };
         int[] spds = { 5, 5, 6 };
         String[] traits = { "HIGH HEALTH TANK", "BALANCED SURVIVOR", "AGILE & HIGH JUMP" };
 
@@ -232,7 +232,7 @@ public class CharacterSelectScreen extends UIScreen {
             g2.setColor(new Color(30, 40, 60));
             g2.fillRect(cx + 80, statY - 9, 105, 10);
             g2.setColor(new Color(0, 220, 120));
-            int hpBarW = (int) (105.0 * (hps[i] / 120.0));
+            int hpBarW = (int) (105.0 * (hps[i] / 140.0));
             g2.fillRect(cx + 80, statY - 9, hpBarW, 10);
 
             // Speed

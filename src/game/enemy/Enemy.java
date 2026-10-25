@@ -5,6 +5,7 @@ import game.GameObject;
 import game.GamePanel;
 import game.Map1.Platform;
 import game.combat.ImpactEffect;
+import game.world.HealthPack;
 import game.world.Item;
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -232,6 +233,9 @@ public abstract class Enemy extends GameObject implements Attackable {
         // Drop item on defeat
         if (gp != null && gp.items != null) {
             gp.items.add(new Item(x + width / 2, y + height / 2));
+            if (Math.random() < 0.25) {
+                gp.items.add(new HealthPack(gp, x + width / 2 - 11, y, true));
+            }
         }
         // Hit explosion spark
         if (gp != null && gp.effects != null) {

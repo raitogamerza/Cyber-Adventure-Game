@@ -51,7 +51,7 @@ public class Projectile extends GameObject {
             this.width = 18;
             this.height = 8;
             this.speed = 14;
-            this.damage = 2;
+            this.damage = 3;
         } else if (this.type == 2) { // Cyborg: High-velocity laser
             this.width = 22;
             this.height = 5;

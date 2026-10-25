@@ -62,7 +62,7 @@ public class BossEnemy extends Enemy {
     }
 
     public BossEnemy(GamePanel gp, int x, int y, int bossType) {
-        super(gp, x, y, (bossType == 3 ? 48 : 44), (bossType == 3 ? 64 : 56), (bossType == 3 ? 50 : 35), (bossType == 3 ? 1.0 : 1.2));
+        super(gp, x, y, (bossType == 3 ? 48 : 44), (bossType == 3 ? 64 : 56), (bossType == 3 ? 160 : 100), (bossType == 3 ? 1.0 : 1.2));
         this.bossType = bossType;
         this.idleFrames = 4;
         this.walkFrames = 6;

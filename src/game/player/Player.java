@@ -57,8 +57,8 @@ public class Player extends GameObject implements Attackable {
             animator.loadCharacter(index);
         }
         if (index == 0) { // Biker: Tanky Brawler
-            maxHealth = 120;
-            health = 120;
+            maxHealth = 140;
+            health = 140;
             speed = 5;
             jumpStrength = -12;
         } else if (index == 2) { // Cyborg: Swift & Agile Infiltrator
@@ -204,6 +204,10 @@ public class Player extends GameObject implements Attackable {
         if (isDead()) {
             gp.gameState = GamePanel.STATE_GAMEOVER;
         }
+    }
+
+    public void heal(int amount) {
+        health = Math.min(maxHealth, health + amount);
     }
 
     public void respawn() {

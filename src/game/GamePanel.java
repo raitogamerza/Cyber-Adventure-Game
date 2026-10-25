@@ -228,6 +228,14 @@ public class GamePanel extends JPanel implements Runnable {
                         itemIt.remove();
                         triggerLevelClear();
                     }
+                } else if (item instanceof HealthPack) {
+                    HealthPack pack = (HealthPack) item;
+                    if (player.getBounds().intersects(pack.getBounds())) {
+                        player.heal(HealthPack.HEAL_AMOUNT);
+                        itemIt.remove();
+                    } else if (pack.isExpired() || pack.y > screenHeight) {
+                        itemIt.remove();
+                    }
                 } else if (item.y > screenHeight) {
                     itemIt.remove();
                 }

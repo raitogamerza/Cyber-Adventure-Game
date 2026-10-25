@@ -2,6 +2,7 @@ package game.Map2;
 
 import game.GamePanel;
 import game.enemy.*;
+import game.world.HealthPack;
 import game.world.Portal;
 
 import java.awt.Graphics2D;
@@ -313,6 +314,10 @@ public class Map2Level {
         // Boss 3 - Cyber Juggernaut + drone escort
         BossEnemy boss = new BossEnemy(gp, t * 116, G - 64, 3);
         gp.enemies.add(boss);
+
+        // Medkits inside the boss room
+        gp.items.add(new HealthPack(gp, t * 106, G - 60, false));
+        gp.items.add(new HealthPack(gp, t * 124, G - 60, false));
         int[][] drones = {{107, 8, 103, 112, 4}, {116, 9, 111, 121, 5}, {124, 8, 120, 128, 4}};
         for (int[] d : drones) {
             DroneEnemy drone = new DroneEnemy(gp, t * d[0], H - t * d[1], t * d[2], t * d[3], d[4]);

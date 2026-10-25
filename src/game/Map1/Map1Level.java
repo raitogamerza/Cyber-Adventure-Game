@@ -179,6 +179,10 @@ public class Map1Level {
         BossEnemy boss = new BossEnemy(gp, t * 116, gp.screenHeight - t * 3 - 56);
         gp.enemies.add(boss);
 
+        // Medkits inside the boss room
+        gp.items.add(new HealthPack(gp, t * 106, gp.screenHeight - t * 3 - 60, false));
+        gp.items.add(new HealthPack(gp, t * 124, gp.screenHeight - t * 3 - 60, false));
+
         DroneEnemy drone1 = new DroneEnemy(gp, t * 108, gp.screenHeight - t * 8, t * 103, t * 112, 4);
         DroneEnemy drone2 = new DroneEnemy(gp, t * 116, gp.screenHeight - t * 9, t * 112, t * 121, 5);
         DroneEnemy drone3 = new DroneEnemy(gp, t * 123, gp.screenHeight - t * 7, t * 119, t * 127, 4);
