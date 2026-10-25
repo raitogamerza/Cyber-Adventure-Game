@@ -30,7 +30,7 @@ public class CharacterSelectScreen extends UIScreen {
         // 0. Biker select button
         int c0X = charStartX;
         buttons.add(new UIButton(c0X + 25, charCardY + 265, 160, 38, "SELECT", () -> {
-            gp.selectedCharacterIndex = 0;
+            if (gp.isCharacterUnlocked(0)) gp.selectedCharacterIndex = 0;
         }));
 
         // 1. Punk select button
@@ -42,7 +42,7 @@ public class CharacterSelectScreen extends UIScreen {
         // 2. Cyborg select button
         int c2X = charStartX + 2 * (charCardW + charSpacing);
         buttons.add(new UIButton(c2X + 25, charCardY + 265, 160, 38, "SELECT", () -> {
-            gp.selectedCharacterIndex = 2;
+            if (gp.isCharacterUnlocked(2)) gp.selectedCharacterIndex = 2;
         }));
 
         // 3. Back Button
@@ -75,7 +75,7 @@ public class CharacterSelectScreen extends UIScreen {
         for (int i = 0; i < 3; i++) {
             int cx = charStartX + i * (charCardW + charSpacing);
             if (mouseX >= cx && mouseX <= cx + charCardW && mouseY >= charCardY && mouseY <= charCardY + charCardH) {
-                gp.selectedCharacterIndex = i;
+                if (gp.isCharacterUnlocked(i)) gp.selectedCharacterIndex = i;
                 break;
             }
         }
@@ -254,6 +254,20 @@ public class CharacterSelectScreen extends UIScreen {
             statY += 16;
             g2.setColor(new Color(0, 255, 180));
             g2.drawString(traits[i], cx + 20, statY);
+
+            // Locked overlay until the matching boss gem is collected
+            if (!gp.isCharacterUnlocked(i)) {
+                g2.setColor(new Color(5, 8, 16, 205));
+                g2.fillRoundRect(cx, charCardY, charCardW, charCardH, 12, 12);
+                g2.setFont(customFont.deriveFont(Font.BOLD, 20f));
+                g2.setColor(new Color(255, 90, 90));
+                String lock = "LOCKED";
+                g2.drawString(lock, cx + (charCardW - g2.getFontMetrics().stringWidth(lock)) / 2, charCardY + 150);
+                g2.setFont(customFont.deriveFont(Font.BOLD, 10f));
+                g2.setColor(new Color(220, 220, 230));
+                String hint = (i == 2) ? "BEAT MAP 1 BOSS: BLUE GEM" : "BEAT MAP 2 BOSS: RED GEM";
+                g2.drawString(hint, cx + (charCardW - g2.getFontMetrics().stringWidth(hint)) / 2, charCardY + 172);
+            }
         }
 
         // Draw buttons
@@ -261,7 +275,10 @@ public class CharacterSelectScreen extends UIScreen {
         for (int i = 0; i < buttons.size(); i++) {
             UIButton btn = buttons.get(i);
             if (i < 3) {
-                if (gp.selectedCharacterIndex == i) {
+                if (!gp.isCharacterUnlocked(i)) {
+                    btn.text = "LOCKED";
+                    btn.isSelected = false;
+                } else if (gp.selectedCharacterIndex == i) {
                     btn.text = "SELECTED";
                     btn.isSelected = true;
                 } else {

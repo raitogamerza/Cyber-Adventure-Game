@@ -4,6 +4,7 @@ import game.GamePanel;
 import game.combat.EnemyProjectile;
 import game.combat.ImpactEffect;
 import game.combat.MuzzleFlash;
+import game.world.Gem;
 import game.world.Item;
 import java.awt.Color;
 import java.awt.Font;
@@ -218,9 +219,10 @@ public class BossEnemy extends Enemy {
                 gp.items.add(new Item(x + 5 + i * 8, y));
             }
         }
-        // Trigger Level Clear Screen!
-        if (gp != null) {
-            gp.triggerLevelClear();
+        // Drop the gem; the level only clears once the player collects it
+        if (gp != null && gp.items != null) {
+            int gemType = (bossType == 3) ? Gem.RED : Gem.BLUE;
+            gp.items.add(new Gem(gp, x + width / 2 - 12, y + height / 2 - 14, gemType));
         }
     }
 

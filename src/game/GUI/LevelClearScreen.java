@@ -128,7 +128,7 @@ public class LevelClearScreen extends UIScreen {
         String statusText = (gp.currentLevel == 2) ? "STATUS: INDUSTRIAL CORE LIBERATED" : "STATUS: DISTRICT 1 LIBERATED";
         String bossDefeatedText = (gp.currentLevel == 2) ? "BOSS: CYBER JUGGERNAUT DEFEATED" : "BOSS: CYBER ENFORCER DEFEATED";
         g2.drawString(statusText, statX, statY);
-        g2.drawString("STAGE TARGETS: 100% PURGED", statX, statY + 22);
+        g2.drawString(gp.lastGemUnlockText, statX, statY + 22);
         g2.drawString(bossDefeatedText, statX, statY + 44);
 
         // Divider Line

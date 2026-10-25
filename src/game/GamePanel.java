@@ -28,8 +28,17 @@ public class GamePanel extends JPanel implements Runnable {
     public volatile int gameState = STATE_MENU; // volatile: also read by Map2's FactoryThread
     public int currentLevel = 1; // 1 = Cyber Outpost, 2 = Industrial Core
     public int selectedCharacterIndex = 1; // 0 = Biker, 1 = Punk, 2 = Cyborg
+    public boolean blueGemCollected = false; // unlocks Cyborg (Map 1 boss)
+    public boolean redGemCollected = false;  // unlocks Biker (Map 2 boss)
+    public String lastGemUnlockText = "";
     public UIManager uiManager;
     private int levelClearDelay = -1;
+
+    public boolean isCharacterUnlocked(int index) {
+        if (index == 2) return blueGemCollected;
+        if (index == 0) return redGemCollected;
+        return true;
+    }
 
     public final int tileSize = 48; 
     public final int screenWidth = tileSize * 20; // 960 (Window Size)
@@ -209,7 +218,17 @@ public class GamePanel extends JPanel implements Runnable {
             while (itemIt.hasNext()) {
                 Item item = itemIt.next();
                 item.update();
-                if (item.y > screenHeight) {
+                if (item instanceof Gem) {
+                    Gem gem = (Gem) item;
+                    if (player.getBounds().intersects(gem.getBounds())) {
+                        if (gem.getGemType() == Gem.BLUE) blueGemCollected = true;
+                        else redGemCollected = true;
+                        lastGemUnlockText = (gem.getGemType() == Gem.BLUE ? "BLUE" : "RED")
+                            + " GEM: " + gem.getUnlockName() + " UNLOCKED";
+                        itemIt.remove();
+                        triggerLevelClear();
+                    }
+                } else if (item.y > screenHeight) {
                     itemIt.remove();
                 }
             }
@@ -385,6 +404,17 @@ public class GamePanel extends JPanel implements Runnable {
         // Border
         g2.setColor(Color.WHITE);
         g2.drawRoundRect(trackX, hudY, barW, barH, 4, 4);
+
+        for (Item item : items) {
+            if (item instanceof Gem) {
+                g2.setFont(new java.awt.Font("Monospaced", java.awt.Font.BOLD, 14));
+                g2.setColor(new Color(255, 215, 0));
+                String msg = "BOSS DEFEATED! COLLECT THE GEM TO FINISH >>";
+                int mw = g2.getFontMetrics().stringWidth(msg);
+                g2.drawString(msg, (screenWidth - mw) / 2, 90);
+                break;
+            }
+        }
 
         // --- Stage Mission Objective Tracker ---
         if (player.x < tileSize * 95) {
